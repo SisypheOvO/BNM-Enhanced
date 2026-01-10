@@ -4,7 +4,10 @@ A userscript that filters only opened BNs in [BN Management](https://bn.mappersg
 
 ![License](https://img.shields.io/badge/license-MIT-orange.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)
 
-![Showcase](./assets/OriginalShowcase.png)
+Filtered vs Original:
+![Showcase](./assets/FilteredShowcase.png)
+
+![OriginalShowcase](./assets/OriginalShowcase.png)
 
 <!-- TODO: add true post here -->
 Check out the Forum post [Development > BNM-filter | user script](https://osu.ppy.sh/community/forums/topics/2145958?n=1).
