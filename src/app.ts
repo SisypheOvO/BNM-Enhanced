@@ -155,6 +155,10 @@ export class Core {
     }
 
     static async improveTablesDisplay() {
+        await DomWaiter.waitForBNTables()
+
+        this.injectStyles()
+
         const tablesContainer = document.querySelector("section.card.card-body .row.align-items-start")
         if (!tablesContainer) {
             console.log("[BNM-Filter] Tables container not found")
