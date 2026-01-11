@@ -1,16 +1,16 @@
 // ==UserScript==
-// @name         BNM-Filter
+// @name         BNM-Enhanced
 // @namespace    URL
 // @version      0.2.2
-// @description  filter opened BNs in BN Management list
+// @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
 // @homepage     https://github.com/SisypheOvO
 // @match        https://bn.mappersguild.com/*
 // @run-at       document-end
 // @grant        none
-// @downloadURL https://raw.githubusercontent.com/SisypheOvO/BNM-Filter/main/dist/bnm-filter.user.js
-// @updateURL https://raw.githubusercontent.com/SisypheOvO/BNM-Filter/main/dist/bnm-filter.user.js
+// @downloadURL https://raw.githubusercontent.com/SisypheOvO/BNM-Enhanced/main/dist/bnm-enhanced.user.js
+// @updateURL https://raw.githubusercontent.com/SisypheOvO/BNM-Enhanced/main/dist/bnm-enhanced.user.js
 // ==/UserScript==
 
 // ============================================
@@ -71,24 +71,24 @@ const CONFIG = {
         static async removeClosedRows() {
             const rows = await DomWaiter.waitForBNTables();
             if (!rows) {
-                console.warn("[BNM-Filter] No BNs rows found");
+                console.warn("[BNM-Enhanced] No BNs rows found");
                 return;
             }
-            console.log(`[BNM-Filter] Found ${rows.length} BNs rows`);
+            console.log(`[BNM-Enhanced] Found ${rows.length} BNs rows`);
             const tables = document.querySelectorAll("table.table-dark");
             tables.forEach((table, tableIndex) => {
                 const tbody = table.querySelector("tbody");
                 if (!tbody)
                     return;
                 const rowsToRemove = tbody.querySelectorAll('tr:has(span.badge-danger[data-toggle="tooltip"][title="closed"])');
-                console.log(`[BNM-Filter] Table ${tableIndex + 1}: Removing ${rowsToRemove.length} closed rows`);
+                console.log(`[BNM-Enhanced] Table ${tableIndex + 1}: Removing ${rowsToRemove.length} closed rows`);
                 // do remove
                 rowsToRemove.forEach((tr) => {
                     try {
                         tr.remove();
                     }
                     catch (e) {
-                        console.error("[BNM-Filter] Error removing row:", e);
+                        console.error("[BNM-Enhanced] Error removing row:", e);
                     }
                 });
                 // add message if no open BNs
@@ -113,10 +113,10 @@ const CONFIG = {
             });
         }
         static injectStyles() {
-            if (document.querySelector("#bnm-filter-styles"))
+            if (document.querySelector("#bnm-enhanced-styles"))
                 return;
             const style = document.createElement("style");
-            style.id = "bnm-filter-styles";
+            style.id = "bnm-enhanced-styles";
             style.textContent = `
         html, body {
             scrollbar-gutter: stable both-edges;
@@ -215,7 +215,7 @@ const CONFIG = {
             this.injectStyles();
             const tablesContainer = document.querySelector("section.card.card-body .row.align-items-start");
             if (!tablesContainer) {
-                console.log("[BNM-Filter] Tables container not found");
+                console.log("[BNM-Enhanced] Tables container not found");
                 return;
             }
             const tables = tablesContainer.querySelectorAll("table.table-dark");
@@ -263,7 +263,7 @@ const CONFIG = {
                 });
                 table.parentNode?.replaceChild(container, table);
             });
-            console.log("[BNM-Filter] Tables display improved");
+            console.log("[BNM-Enhanced] Tables display improved");
         }
         static patchModalClose() {
             if (this.modalClosePatched)
@@ -276,19 +276,19 @@ const CONFIG = {
                         const modal = window.$("#userInfo");
                         if (modal.length > 0) {
                             // remove previous listener to avoid duplication
-                            modal.off("hidden.bs.modal.bnmfilter");
+                            modal.off("hidden.bs.modal.bnmenhanced");
                             // listen for modal close event
-                            modal.on("hidden.bs.modal.bnmfilter", () => {
+                            modal.on("hidden.bs.modal.bnmenhanced", () => {
                                 const url = new URL(window.location.href);
                                 if (url.searchParams.has("id")) {
                                     // remove id parameter
                                     url.searchParams.delete("id");
                                     // update URL using history API
                                     window.history.pushState({}, "", url.pathname + url.search);
-                                    console.log("[BNM-Filter] URL cleaned after modal close");
+                                    console.log("[BNM-Enhanced] URL cleaned after modal close");
                                 }
                             });
-                            console.log("[BNM-Filter] Modal close listener added");
+                            console.log("[BNM-Enhanced] Modal close listener added");
                         }
                         else {
                             setTimeout(addListener, 500);
@@ -296,24 +296,24 @@ const CONFIG = {
                     };
                     addListener();
                     // listen for backdrop click
-                    window.$(document).on("click.bnmfilter", ".modal-backdrop", () => {
+                    window.$(document).on("click.bnmenhanced", ".modal-backdrop", () => {
                         setTimeout(() => {
                             const url = new URL(window.location.href);
                             if (url.searchParams.has("id")) {
                                 url.searchParams.delete("id");
                                 window.history.pushState({}, "", url.pathname + url.search);
-                                console.log("[BNM-Filter] URL cleaned after backdrop click");
+                                console.log("[BNM-Enhanced] URL cleaned after backdrop click");
                             }
                         }, 100);
                     });
                     // listen for close button
-                    window.$(document).on("click.bnmfilter", '#userInfo [data-dismiss="modal"]', () => {
+                    window.$(document).on("click.bnmenhanced", '#userInfo [data-dismiss="modal"]', () => {
                         setTimeout(() => {
                             const url = new URL(window.location.href);
                             if (url.searchParams.has("id")) {
                                 url.searchParams.delete("id");
                                 window.history.pushState({}, "", url.pathname + url.search);
-                                console.log("[BNM-Filter] URL cleaned after close button");
+                                console.log("[BNM-Enhanced] URL cleaned after close button");
                             }
                         }, 100);
                     });
@@ -372,7 +372,7 @@ const CONFIG = {
                 childList: true,
                 subtree: true,
             });
-            console.log("[BNM-Filter] Fade removal patched");
+            console.log("[BNM-Enhanced] Fade removal patched");
         }
     }
     Core.modalClosePatched = false;
