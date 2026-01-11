@@ -35,6 +35,6 @@ npm run build # build the userscript
 
 ## TODO
 
-- [ ] Fix routing when UserCard clicked
-- [ ] Improve BN List style
+- [x] Fix routing when UserCard clicked
+- [x] Improve BN List style
 - [ ] Maybe add a button for toggling

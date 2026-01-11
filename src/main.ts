@@ -1,15 +1,19 @@
 import { Core } from "@/app"
 
 function init() {
+    // perform patches as early as possible
+    Core.patchFadeRemoval()
+    Core.patchModalClose()
+
     const initCore = async () => {
-        await Core.removeClosedRows();
-        await Core.improveTablesDisplay();
-    };
+        await Core.removeClosedRows()
+        await Core.improveTablesDisplay()
+    }
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initCore);
+        document.addEventListener("DOMContentLoaded", initCore)
     } else {
-        initCore();
+        initCore()
     }
 
     // listen 2 url changes (if BN Management uses SPA routing)
