@@ -1,4 +1,7 @@
-import { DomWaiter } from "./utils/dom"
+import { DomWaiter } from "@/utils/dom"
+import { ConfigManager } from "@/utils/config"
+import { ApiClient } from "@/utils/api"
+import { DateUtils } from "@/utils/date"
 
 declare global {
     interface Window {
@@ -7,23 +10,174 @@ declare global {
 }
 
 export class Core {
-    static async removeClosedRows() {
+    static filterButtonAdded = false
+
+    static async addFilterButton() {
+        if (this.filterButtonAdded) return
+
+        await DomWaiter.waitForBNTables()
+
+        const filterContainer = document.createElement("div")
+        filterContainer.className = "bn-filter-container mb-3 p-2 px-3 bg-dark rounded"
+        filterContainer.innerHTML = `
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <label class="text-light">
+                    <span class="me-2">Closed Days Filter:</span>
+                    <input type="number"
+                           class="form-control form-control-sm d-inline-block"
+                           style="width: 80px;"
+                           min="1"
+                           max="999"
+                           value="${ConfigManager.getFilterDays()}"
+                           id="bn-filter-days">
+                    <span class="ms-2">days</span>
+                </label>
+                <span class="text-muted small">(BNs closed for more than this number of days will be retained)</span>
+                <button class="btn btn-sm btn-primary" id="bn-apply-filter">Apply Filter</button>
+            </div>
+        `
+
+        const tablesContainer = document.querySelector("section.card.card-body .row.align-items-start")
+        if (tablesContainer) {
+            tablesContainer.parentElement?.insertBefore(filterContainer, tablesContainer)
+        }
+
+        const input = document.getElementById("bn-filter-days") as HTMLInputElement
+        const applyBtn = document.getElementById("bn-apply-filter")
+
+        if (input && applyBtn) {
+            const applyFilter = () => {
+                const days = parseInt(input.value)
+                if (!isNaN(days) && days > 0) {
+                    ConfigManager.setFilterDays(days)
+                    window.location.reload()
+                }
+            }
+
+            input.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    applyFilter()
+                }
+            })
+
+            applyBtn.addEventListener("click", applyFilter)
+        }
+
+        this.filterButtonAdded = true
+    }
+
+    static async removeClosedRows(useDateFilter: boolean = false) {
         const rows = await DomWaiter.waitForBNTables()
         if (!rows) {
             console.warn("[BNM-Enhanced] No BNs rows found")
             return
         }
 
+        if (useDateFilter) {
+            await ApiClient.fetchRelevantInfo()
+        }
+
         console.log(`[BNM-Enhanced] Found ${rows.length} BNs rows`)
 
         const tables = document.querySelectorAll("table.table-dark")
-        tables.forEach((table, tableIndex) => {
+        const filterDays = ConfigManager.getFilterDays()
+
+        for (const [tableIndex, table] of tables.entries()) {
             const tbody = table.querySelector("tbody")
-            if (!tbody) return
+            if (!tbody) continue
 
-            const rowsToRemove = tbody.querySelectorAll('tr:has(span.bg-danger[data-bs-toggle="tooltip"][data-bs-original-title="closed"])')
+            const rowsToRemove: Element[] = []
+            const rowsKept: Element[] = []
 
-            console.log(`[BNM-Enhanced] Table ${tableIndex + 1}: Removing ${rowsToRemove.length} closed rows`)
+            const allRows = tbody.querySelectorAll("tr")
+
+            for (const row of allRows) {
+                const closedBadge = row.querySelector('span.badge.bg-danger[data-bs-original-title="closed"]')
+                const isClosed = !!closedBadge
+
+                if (isClosed) {
+                    if (useDateFilter) {
+                        // then compare lastOpenedForRequests with filterDays to decide remove or keep
+                        const homeCard = row.querySelector(".home-card")
+                        let osuId: number | null = null
+                        let username: string | null = null
+
+                        // get info from card
+                        if (homeCard) {
+                            const userLink = homeCard.querySelector('a[href*="users/"]')
+                            if (userLink) {
+                                username = userLink.textContent?.trim() || null
+
+                                const href = userLink.getAttribute("href")
+                                const match = href?.match(/users[/=](\d+)/)
+                                if (match) osuId = parseInt(match[1])
+                            }
+
+                            if (!osuId) {
+                                const avatarImg = homeCard.querySelector("img.card-avatar-img")
+                                if (avatarImg) {
+                                    const src = avatarImg.getAttribute("src")
+                                    const match = src?.match(/https:\/\/a\.ppy\.sh\/(\d+)/)
+                                    if (match) osuId = parseInt(match[1])
+                                }
+                            }
+
+                            if (!osuId && username) {
+                                for (const [id, info] of ApiClient.getCache().entries()) {
+                                    if (info.username === username) {
+                                        osuId = id
+                                        break
+                                    }
+                                }
+                            }
+                        }
+
+                        if (osuId) {
+                            const bnInfo = ApiClient.getBNInfo(osuId)
+                            if (bnInfo) {
+                                if (bnInfo.isClosed && bnInfo.lastOpenedForRequests) {
+                                    const daysSinceLastOpen = DateUtils.daysSince(new Date(bnInfo.lastOpenedForRequests))
+
+                                    const lastOpenDate = new Date(bnInfo.lastOpenedForRequests).toLocaleDateString()
+                                    console.log(`[BNM-Enhanced] ${bnInfo.username} (${osuId}):
+                                        Last opened: ${lastOpenDate}
+                                        Days since: ${daysSinceLastOpen}
+                                        Filter days: ${filterDays}
+                                        Action: ${daysSinceLastOpen <= filterDays ? "REMOVE (recently closed)" : "KEEP (long closed)"}`)
+
+                                    if (daysSinceLastOpen <= filterDays) {
+                                        rowsToRemove.push(row)
+                                    } else {
+                                        rowsKept.push(row)
+                                    }
+                                } else if (bnInfo.isClosed && !bnInfo.lastOpenedForRequests) {
+                                    console.log(`[BNM-Enhanced] ${bnInfo.username} is closed but no lastOpened date, keeping`)
+                                    rowsKept.push(row)
+                                } else {
+                                    console.log(`[BNM-Enhanced] ${bnInfo.username} is not closed but has closed badge?`)
+                                    rowsKept.push(row)
+                                }
+                            } else {
+                                console.log(`[BNM-Enhanced] No API info for osuId ${osuId} (${username}), removing closed row by default`)
+                                rowsToRemove.push(row)
+                            }
+                        } else {
+                            console.log(`[BNM-Enhanced] Could not extract osuId for ${username || "unknown user"}, removing closed row by default`)
+                            rowsToRemove.push(row)
+                        }
+                    } else {
+                        rowsToRemove.push(row)
+                    }
+                } else {
+                    rowsKept.push(row)
+                }
+            }
+
+            console.log(`[BNM-Enhanced] Table ${tableIndex + 1}:
+                Total: ${allRows.length}
+                Closed: ${rowsToRemove.length + rowsKept.length}
+                → Removing: ${rowsToRemove.length} (recently closed)
+                → Keeping: ${rowsKept.length} (long closed + open)`)
 
             // do remove
             rowsToRemove.forEach((tr) => {
@@ -52,7 +206,7 @@ export class Core {
                     }
                 }
             }, 100)
-        })
+        }
     }
 
     static injectStyles() {
@@ -155,14 +309,46 @@ export class Core {
         .modal-backdrop {
             opacity:  0.5 !important;
         }
+
+        .bn-filter-container {
+            background: #1a2623 !important;
+            border: 1px solid #1a201f;
+            border-radius: 8px !important;
+            margin-bottom: 1rem 0 !important;
+            margin-left: 1rem !important;
+            margin-right: 1rem !important;
+        }
+
+        .bn-filter-container .form-control {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-align: center;
+        }
+
+        .bn-filter-container .form-control:focus {
+            border-color: #304844;
+            box-shadow: 0 0 0 0.25rem rgba(48, 72, 68, 0.25);
+        }
+
+        .bn-filter-container .btn-primary {
+            background: linear-gradient(45deg, #304844, #243633);
+            border: none;
+            padding: 0.375rem 1.5rem;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .bn-filter-container .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px #293d3a;
+        }
         `
         document.head.appendChild(style)
     }
 
     static async improveTablesDisplay() {
         await DomWaiter.waitForBNTables()
-
-        this.injectStyles()
 
         const tablesContainer = document.querySelector("section.card.card-body .row.align-items-start")
         if (!tablesContainer) {

@@ -1,12 +1,16 @@
 import { Core } from "@/app"
+import { ConfigManager } from "@/utils/config"
 
 declare const CONFIG: {
     removeClosedBN: boolean
+    FilterClosedDuration: boolean
     improveTableStyle: boolean
     removeFadeEffect: boolean
 }
 
 function init() {
+    ConfigManager.init()
+
     // perform patches as early as possible
     if (CONFIG.removeFadeEffect) {
         Core.patchFadeRemoval()
@@ -14,8 +18,17 @@ function init() {
     Core.patchModalClose()
 
     const initCore = async () => {
+        if (CONFIG.improveTableStyle) {
+            // inject styles early to avoid FOUC
+            Core.injectStyles()
+        }
         if (CONFIG.removeClosedBN) {
-            await Core.removeClosedRows()
+            if (CONFIG.FilterClosedDuration) {
+                await Core.addFilterButton()
+                await Core.removeClosedRows(true)
+            } else {
+                await Core.removeClosedRows(false)
+            }
         }
         if (CONFIG.improveTableStyle) {
             await Core.improveTablesDisplay()

@@ -8,7 +8,7 @@ export default {
         banner: `// ==UserScript==
 // @name         BNM-Enhanced
 // @namespace    URL
-// @version      0.3.1
+// @version      0.4.0
 // @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
@@ -26,6 +26,10 @@ export default {
 const CONFIG = {
     // Remove closed BNs from the list
     removeClosedBN: true,
+
+    // Add a Selector for filtering closed BNs older than a certain number of days
+    // Only works if "removeClosedBN" is set to true
+    FilterClosedDuration: true,
 
     // Improve the table style to a card grid layout
     improveTableStyle: true,
