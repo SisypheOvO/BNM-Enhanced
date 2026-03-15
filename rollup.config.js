@@ -8,11 +8,11 @@ export default {
         banner: `// ==UserScript==
 // @name         BNM-Enhanced
 // @namespace    URL
-// @version      0.2.2
+// @version      0.3.0
 // @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
-// @homepage     https://github.com/SisypheOvO
+// @homepageURL  https://github.com/SisypheOvO
 // @match        https://bn.mappersguild.com/*
 // @run-at       document-end
 // @grant        none

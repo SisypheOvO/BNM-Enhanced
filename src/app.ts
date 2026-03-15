@@ -21,7 +21,7 @@ export class Core {
             const tbody = table.querySelector("tbody")
             if (!tbody) return
 
-            const rowsToRemove = tbody.querySelectorAll('tr:has(span.badge-danger[data-toggle="tooltip"][title="closed"])')
+            const rowsToRemove = tbody.querySelectorAll('tr:has(span.bg-danger[data-bs-toggle="tooltip"][data-bs-original-title="closed"])')
 
             console.log(`[BNM-Enhanced] Table ${tableIndex + 1}: Removing ${rowsToRemove.length} closed rows`)
 
@@ -63,15 +63,19 @@ export class Core {
         style.textContent = `
         html, body {
             scrollbar-gutter: stable both-edges;
+            min-width: 330px !important;
         }
 
         a#mgsite {
             position: absolute;
         }
 
-        /* flex tables vertically */
         section div.row[mode="out-in"] {
             flex-direction: column !important;
+        }
+
+        .col-6.col-md-3 {
+            width: 100% !important;
         }
 
         .bn-cards-grid {
@@ -108,6 +112,7 @@ export class Core {
             overflow: hidden;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2) !important;
             min-height: 55px !important;
+            min-width: 220px !important;
             width: 100% !important;
             padding-left: .9rem !important;
             transition: all 0.2s ease;
@@ -200,7 +205,7 @@ export class Core {
                 if (!cardDiv) return
 
                 // check if closed
-                const isClosed = cardDiv.querySelector('.badge-danger[title="closed"]')
+                const isClosed = cardDiv.querySelector('.badge-danger[data-bs-original-title="closed"]')
 
                 if (isClosed) {
                     cardDiv.classList.add("bn-closed")
@@ -208,12 +213,7 @@ export class Core {
                     cardDiv.classList.add("bn-open")
                 }
 
-                // create card column
-                const cardCol = document.createElement("div")
-                cardCol.className = "card-col"
-
-                cardCol.appendChild(cardDiv)
-                cardsContainer.appendChild(cardCol)
+                cardsContainer.appendChild(cardDiv)
             })
 
             table.parentNode?.replaceChild(container, table)
