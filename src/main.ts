@@ -6,6 +6,7 @@ declare const CONFIG: {
     FilterClosedDuration: boolean
     improveTableStyle: boolean
     removeFadeEffect: boolean
+    cleanURLAfterModalClose: boolean
 }
 
 function init() {
@@ -15,7 +16,9 @@ function init() {
     if (CONFIG.removeFadeEffect) {
         Core.patchFadeRemoval()
     }
-    Core.patchModalClose()
+    if (CONFIG.cleanURLAfterModalClose) {
+        Core.patchModalClose()
+    }
 
     const initCore = async () => {
         if (CONFIG.improveTableStyle) {

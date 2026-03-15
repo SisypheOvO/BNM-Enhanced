@@ -8,7 +8,7 @@ export default {
         banner: `// ==UserScript==
 // @name         BNM-Enhanced
 // @namespace    URL
-// @version      0.4.0
+// @version      0.4.1
 // @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
@@ -36,6 +36,9 @@ const CONFIG = {
 
     // Remove fade-in and fade-out effects from modals
     removeFadeEffect: true,
+
+    // Clean URL after closing modals to prevent unwanted query parameters
+    cleanURLAfterModalClose: true
 };
 // ============================================
 
