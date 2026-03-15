@@ -8,7 +8,7 @@ export default {
         banner: `// ==UserScript==
 // @name         BNM-Enhanced
 // @namespace    URL
-// @version      0.3.0
+// @version      0.3.1
 // @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
