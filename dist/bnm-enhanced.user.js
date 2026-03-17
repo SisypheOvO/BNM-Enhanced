@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BNM-Enhanced
 // @namespace    URL
-// @version      0.4.2
+// @version      0.4.3
 // @description  enhance the BN-Management experience with additional features and improved UI.
 // @author       Sisyphus
 // @license      MIT
@@ -74,7 +74,7 @@ const CONFIG = {
         }
     }
 
-    const STORAGE_KEY = 'bnm-enhanced-filter-config';
+    const STORAGE_KEY = "bnm-enhanced-filter-config";
     class ConfigManager {
         static init() {
             this.loadFromStorage();
@@ -88,7 +88,7 @@ const CONFIG = {
                 }
             }
             catch (e) {
-                console.error('[BNM-Enhanced] Failed to load config from storage:', e);
+                console.error("[BNM-Enhanced] Failed to load config from storage:", e);
             }
         }
         static saveToStorage() {
@@ -96,7 +96,7 @@ const CONFIG = {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
             }
             catch (e) {
-                console.error('[BNM-Enhanced] Failed to save config to storage:', e);
+                console.error("[BNM-Enhanced] Failed to save config to storage:", e);
             }
         }
         static getFilterDays() {
