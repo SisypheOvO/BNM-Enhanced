@@ -418,31 +418,15 @@ export class Core {
             if (window.$ && window.$.fn && window.$.fn.modal) {
                 clearInterval(checkJQuery)
 
-                const addListener = () => {
-                    const modal = window.$("#userInfo")
-                    if (modal.length > 0) {
-                        // remove previous listener to avoid duplication
-                        modal.off("hidden.bs.modal.bnmenhanced")
-
-                        // listen for modal close event
-                        modal.on("hidden.bs.modal.bnmenhanced", () => {
-                            const url = new URL(window.location.href)
-                            if (url.searchParams.has("id")) {
-                                // remove id parameter
-                                url.searchParams.delete("id")
-                                // update URL using history API
-                                window.history.pushState({}, "", url.pathname + url.search)
-                                console.log("[BNM-Enhanced] URL cleaned after modal close")
-                            }
-                        })
-
-                        console.log("[BNM-Enhanced] Modal close listener added")
-                    } else {
-                        setTimeout(addListener, 500)
+                // listen for modal close event using delegation
+                window.$(document).on("hidden.bs.modal.bnmenhanced", "#userInfo", () => {
+                    const url = new URL(window.location.href)
+                    if (url.searchParams.has("id")) {
+                        url.searchParams.delete("id")
+                        window.history.pushState({}, "", url.pathname + url.search)
+                        console.log("[BNM-Enhanced] URL cleaned after modal close")
                     }
-                }
-
-                addListener()
+                })
 
                 // listen for backdrop click
                 window.$(document).on("click.bnmenhanced", ".modal-backdrop", () => {
