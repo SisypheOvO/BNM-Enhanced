@@ -2,9 +2,11 @@
 
 A userscript that
 
-- Filters only opened BNs in [BN Management](https://bn.mappersguild.com/) lists--A Blessing for Offline Users!
-- Change the lists to grid of cards--Easier to view at once and more aesthetic
-- Removes fade-in and fade-out animations when toggling Information Dialogs---Faster access
+- Shows only opened BNs in [BN Management](https://bn.mappersguild.com/) lists
+  - User can configure the lists to also show BNs that have been closed for more than N days
+- Changes the lists to grid of cards--Easier to view at once and more aesthetic
+- Removes fade-in and fade-out animations when toggling Information Dialogs
+- Clear the URL when Information Dialog is closed
 
 ![License](https://img.shields.io/badge/license-MIT-orange.svg) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)
 
