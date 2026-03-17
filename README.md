@@ -28,6 +28,12 @@ Filtered vs Original:
 
     ![autoUpdate](./assets/autoUpdate.png)
 
+## Usage
+
+![Settings](./assets/config.png)
+
+Configure functionality by switching the values in the `Config Options` part of the script.
+
 ## Contributing
 
 Feel free to submit issues and pull requests to improve the script.
